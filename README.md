@@ -16,6 +16,8 @@ preprocessing: This tool works with highly error-prone data, but that will slow 
 
 FLAIR-fusion preprocessing: FLAIR-fusion needs to generate two reference files - a transcriptome intron location reference and a transcriptome homology reference. This takes a while, so make sure you only use the -q option to generate these files once per genome/transcriptome reference and afterwards provide the file locations wil -e and -p
 
+
+```bash
 usage: python[3+] fusionfindingpipeline.py -r reads.[fq/fa] -t transcriptome.fa -g genome.fa -a annotation.gtf [-m OR -s readsAlignedToTranscriptome.bam] [-q OR -e path.tsv -p path.tsv] [other options] -i
 
 FLAIR-fusion 2.0 parse options
@@ -56,8 +58,8 @@ options:
                         
   -m, --alignTranscriptome
                         whether to align reads to transcriptome, if this is not selected, need to give .bam file with -s option
-
-
+  -o O, --output O      output file name base, if not specified, will be derived from reads file name. This will prefix all output files.
+```
 
 OUTPUTS
 
