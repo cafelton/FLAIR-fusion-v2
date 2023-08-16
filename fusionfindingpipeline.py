@@ -10,8 +10,8 @@ path = os.path.dirname(os.path.realpath(__file__))
 
 parser = argparse.ArgumentParser(description='FLAIR-fusion 2.0 parse options',
                                  usage='python[3+] fusionfindingpipeline.py -r reads.[fq/fa] -t transcriptome.fa -g genome.fa -a annotation.gtf [-m OR -s readsAlignedToTranscriptome.bam] [-q OR -e path.tsv -p path.tsv] [other options] -i')
-# parser.add_argument('-o', '--output', action='store', dest='o', default=date.today().strftime("%d-%m-%Y"),
-#                     help='output file name base (default: date)')
+parser.add_argument('-o', '--output', action='store', dest='o',
+                    help='output file name base, if not specified, will be derived from reads file name. This will prefix all output files.')
 # parser.add_argument('-f', '--flair', action='store', dest='f', default="",
 #                     help='flair path')
 parser.add_argument('-g', '--genome', action='store', dest='g',
@@ -50,6 +50,8 @@ parser.add_argument('-m', '--alignTranscriptome', action='store_true', dest='m',
 args = parser.parse_args()
 overallstart = time.time()
 prefix = '.'.join(args.r.split('.')[:-1])
+if args.o: prefix = args.o
+
 if len(args.d) > 0 and args.d[-1] != '/': args.d += '/'
 
 if not os.path.isfile(args.r):
@@ -111,7 +113,7 @@ if not os.path.isfile(args.s + '.bai'):
     raise Exception('bam file index does not exist, index your file please')
 
 start = time.time()
-subprocess.call([sys.executable, path + '/removeParalogsGetChim-07-18-23.py', '-r', args.r, '-s', args.s, '-e', args.e, '-p', args.p, '-b', args.b, '-l', args.l, '-a', args.a])
+subprocess.call([sys.executable, path + '/removeParalogsGetChim-07-18-23.py', '-r', args.r, '-s', args.s, '-e', args.e, '-p', args.p, '-b', args.b, '-l', args.l, '-a', args.a, '-o', prefix])
 print('base fusion finding done')
 print('total fusion finding time: ', time.time()-start)
 
@@ -119,7 +121,7 @@ if args.i: #want fusion isoforms and further filtering
     if not os.path.isfile(args.g):
         raise Exception('genome file does not exist')
     start = time.time()
-    subprocess.call([sys.executable, path + '/make_synthetic_fusion_reference-06-27-2023.py', '-g', args.g, '-a', args.a, '-r', '.'.join(args.s.split('.')[:-1]) + 'chimericBreakpoints.tsv'])
+    subprocess.call([sys.executable, path + '/make_synthetic_fusion_reference-06-27-2023.py', '-g', args.g, '-a', args.a, '-r', prefix + 'chimericBreakpoints.tsv', '-o', prefix])
     print('synthetic fusion genome and annotation creation done')
 
     process = subprocess.Popen('minimap2 -ax splice --secondary=no -G 1000k ' + prefix + '-syntheticFusionGenome.fa ' + prefix +

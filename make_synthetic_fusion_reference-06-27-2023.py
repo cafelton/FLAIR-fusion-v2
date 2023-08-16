@@ -6,9 +6,12 @@ parser = argparse.ArgumentParser(description='FLAIR-fusion 2.0 parse options', u
 parser.add_argument('-r', '--chimBp', action='store', dest='r', default="", help='.fa or fq file')
 parser.add_argument('-g', '--genome', action='store', dest='g', default="", help='path to genome')
 parser.add_argument('-a', '--anno', action='store', dest='a', default="", help='path to anno.gtf')
+parser.add_argument('-o', '--output', action='store', dest='o',
+                    help='output file name base, if not specified, will be derived from reads file name. This will prefix all output files.')
 args = parser.parse_args()
 
 prefix = '.'.join(args.r.split('.')[:-2])
+if args.o: prefix = args.o
 
 def revComp(seq):
     newseq = ''

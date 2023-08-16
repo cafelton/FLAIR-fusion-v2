@@ -47,10 +47,13 @@ parser.add_argument('-l', '--readSupport', action='store', dest='l', default=3,
 parser.add_argument('-a', '--anno', action='store', dest='a',
                     default="",
                     help='path to anno.gtf')
+parser.add_argument('-o', '--output', action='store', dest='o',
+                    help='output file name base, if not specified, will be derived from reads file name. This will prefix all output files.')
 args = parser.parse_args()
 args.b = int(args.b)
 args.l = int(args.l)
 prefix = '.'.join(args.s.split('.')[:-1])
+if args.o: prefix = args.o
 
 paralogs = {}
 for line in open(args.p):
@@ -377,6 +380,7 @@ out = open(prefix + '-fusionReadCounts.tsv',
            'w')  # 'sim-nice-10x-gencode38-fusion-sim-test-06-12-2023.transcriptomeAligned-readCounts-para-genomedist-fastqdist-removed-keep-1rs-combine-chim.tsv', 'w')
 out3 = open(prefix + 'genomeChunksToCut.bed', 'w')
 out4 = open(prefix + 'chimericBreakpoints.tsv', 'w')
+out6 = open(prefix + 'fusionWithSupportingReads.tsv', 'w')
 
 # fusionReads = set()
 readToFusion = {}
@@ -511,6 +515,7 @@ for chimname in genomeCloseRemovedChimToReads:
 
                 out.write('-'.join(genes) + '\t' + str(len(genomeCloseRemovedChimToReads[chimname])) + '\n')
                 # fusionReads = fusionReads | genomeCloseRemovedChimToReads[chimname]
+                out6.write('-'.join(genes) + '\t' + ','.join(genomeCloseRemovedChimToReads[chimname]) + '\n')
                 for i in genomeCloseRemovedChimToReads[chimname]: readToFusion[i] = '-'.join(genes)
             else:
                 rejectOut.write('--'.join(genes) + '\t' + 'edgeOfGene' + '\n')
@@ -526,7 +531,7 @@ print('chim, reads after removing fastq dist', chimAfterFastqDistRemoved, readsA
 
 if chimAfterFastqDistRemoved > 0:
     if args.r.split('.')[-1] == 'fastq' or args.r.split('.')[-1] == 'fq':
-        out5 = open('.'.join(args.r.split('.')[:-1]) + '-fusionOnly.fastq', 'w')
+        out5 = open(prefix + '-fusionOnly.fastq', 'w')
         last = False
         for line in open(args.r):
             if line[0] == '@':
@@ -536,7 +541,7 @@ if chimAfterFastqDistRemoved > 0:
                     last = False
             if last: out5.write(line)
     elif args.r.split('.')[-1] == 'fasta' or args.r.split('.')[-1] == 'fa':
-        out5 = open('.'.join(args.r.split('.')[:-1]) + '-fusionOnly.fasta', 'w')
+        out5 = open(prefix + '-fusionOnly.fasta', 'w')
         last = False
         for line in open(args.r):
             if line[0] == '>':
